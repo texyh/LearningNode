@@ -105,6 +105,10 @@ app.get('/users/me', authenticate, (req, res) => {
     res.send(req.user)
 })
 
+app.get('/users', (req, res) => {
+    console.log('upcoming');
+})
+
 
 app.listen(process.env.PORT, () => {
     console.log('started on port ' +  process.env.NODE_ENV);
