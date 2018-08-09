@@ -31,7 +31,7 @@ const users = [
          email : 'test@example.com',
          password : 'user2password'
      }
-]
+];
 
 const populateTodos = (done) => {
     Todo.insertMany(todos).then(() => done()).catch(e => done(e));
