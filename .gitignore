@@ -1,2 +1,3 @@
 node_modules
 *.log
+rest-api/server/config/config.json

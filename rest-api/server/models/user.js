@@ -3,6 +3,8 @@ const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
 const bcrypt = require('bcryptjs');
+
+
 const UserSchema = new mongoose.Schema({
     email : {
         type : String,
@@ -41,7 +43,7 @@ const UserSchema = new mongoose.Schema({
 UserSchema.methods.generateAuthToken = function () {
     const user = this;
     let access = 'auth';
-    let token = jwt.sign({_id : user._id.toString(), access}, 'emeka').toString();
+    let token = jwt.sign({_id : user._id.toString(), access}, process.env.JWT_SECRET).toString();
 
     user.tokens.push({access, token})
 
@@ -50,6 +52,17 @@ UserSchema.methods.generateAuthToken = function () {
     })
 };
 
+UserSchema.methods.removeToken = function(token) {
+    const user = this;
+
+    return user.update({
+        $pull : {
+            tokens : {
+                token
+            }
+        }
+    })
+}
 
 UserSchema.methods.toJSON = function () {
     var user = this;
@@ -63,7 +76,7 @@ UserSchema.statics.findByToken = function(token) {
     var decoded;
 
     try {
-        decoded =  jwt.verify(token, 'emeka');
+        decoded =  jwt.verify(token, process.env.JWT_SECRET);
     } catch (error) {
         return new Promise((resolve, reject) => {
             reject(error);
@@ -78,6 +91,26 @@ UserSchema.statics.findByToken = function(token) {
         'tokens.access' : 'auth'
     })
 }
+
+UserSchema.statics.findByCredentials = function(email, password) {
+    var User = this;
+
+    return User.findOne({email}).then((user) => {
+        debugger;
+        if(!user) {
+            return Promise.reject();
+        }
+
+        return new Promise((resolve, reject) => {
+            bcrypt.compare(password, user.password, (err, result) => {
+                if(result) {
+                    resolve(user);
+                }
+                reject();
+            })
+        })
+    })
+};
 
 //called before save
 UserSchema.pre('save', function(next) {

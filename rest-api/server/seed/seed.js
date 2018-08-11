@@ -3,18 +3,21 @@ const {Todo} = require('../models/todo');
 const {User} = require('../models/user');
 const jwt = require('jsonwebtoken');
 
+const userOneId = new ObjectId();
+const userTwoId = new ObjectId();
+
 const todos = [
     {
         _id : new ObjectId(),
-        text: 'first'
+        text: 'first',
+        _creator : userOneId
     }, 
     {
         _id : new ObjectId(),
-        text:'second'
+        text:'second',
+        _creator : userOneId
     }
 ]
-const userOneId = new ObjectId();
-const userTwoId = new ObjectId();
 
 const users = [
     {
@@ -23,13 +26,17 @@ const users = [
         password : 'user1password',
         tokens : [{
             access : 'auth',
-            token : jwt.sign({_id: userOneId, access : 'auth'}, 'emeka').toString()
+            token : jwt.sign({_id: userOneId, access : 'auth'}, process.env.JWT_SECRET).toString()
         }]
     },
      {
          _id : userTwoId,
          email : 'test@example.com',
-         password : 'user2password'
+         password : 'user2password',
+         tokens : [{
+            access : 'auth',
+            token : jwt.sign({_id: userTwoId, access : process.env.JWT_SECRET}, 'emeka').toString()
+        }]
      }
 ];
 
@@ -41,19 +48,19 @@ const populateUsers = (done) => {
     var userOne = new User(users[0]).save();
     var userTwo = new User(users[1]).save();
 
-    return Promise.all([userOne, userTwo]).then(() => {
-        done()
+    Promise.all([userOne, userTwo]).then(() => {
+        done();
     })
 }
 
 const deleteUsers = (done) => {
     User.remove({}).then(() => {
-        //done();
+        done()
     })
 }
 
 const deleteTodos = (done) => {
-    Todo.remove({}).then(() => console.log());
+    Todo.remove({}).then(() => done());
 }
 
 module.exports = {

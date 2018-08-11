@@ -9,22 +9,20 @@ const{populateTodos, deleteTodos, users, deleteUsers, populateUsers, todos} = re
 describe('POST /todos', () => {
 
     beforeEach((done) => {
-        deleteTodos(done);
         populateTodos(done);
     });
 
     beforeEach((done) => {
-        deleteUsers(done);
         populateUsers(done);
     });
 
-    // afterEach((done) => {
-    //     deleteUsers(done);
-    // });
+    afterEach((done) => {
+        deleteUsers(done);
+    });
 
-    // afterEach((done) => {
-    //     deleteTodos(done);
-    // });
+    afterEach((done) => {
+        deleteTodos(done);
+    });
 
     it('should create a new todo', (done) => {
 
@@ -34,6 +32,7 @@ describe('POST /todos', () => {
 
         request(app)
             .post('/todos')
+            .set('x-auth', users[0].tokens[0].token)
             .send({text})
             .expect(200)
             .expect((res) => {
@@ -55,6 +54,7 @@ describe('POST /todos', () => {
     it('should not create a new todo', (done) => {
         request(app)
             .post('/todos')
+            .set('x-auth', users[0].tokens[0].token)
             .send()
             .expect(400)
             .end((err, res) => {
@@ -71,6 +71,7 @@ describe('POST /todos', () => {
     it('should get all todos', (done) => {
         request(app)
             .get('/todos')
+            .set('x-auth', users[0].tokens[0].token)
             .expect(200)
             .expect(res => {
                 expect(res.body.todos.length).toBe(2);
